@@ -212,7 +212,7 @@ public class App {
                         int totalPerItem = keranjangHarga[i] * keranjangJumlah[i];
                         int pajakTotalItem = 0;
 
-                        System.out.printf("%-4s | %-25s | %-3d | %-8d | %-5d | %d.000\n",
+                        System.out.printf("%-4s | %-25s | %-3d | %-8d | %-5d | %d\n",
                                 keranjangKode[i], keranjangNama[i], keranjangJumlah[i], keranjangHarga[i], pajakTotalItem, totalPerItem);
 
                         totalMakananNoTax += totalPerItem;
@@ -244,11 +244,11 @@ public class App {
 
                     if (opsiAkhir.equals("N")) {
                         System.out.println("Program akan ditutup");
-                        break MainApp; // LANGSUNG MENGHENTIKAN APLIKASI
+                        break MainApp; 
 
                     } else if (opsiAkhir.equals("Y")) {
                         System.out.println("\nPesanan baru dibuat");
-                        break; // Keluar dari loop Y/N ini saja, membiarkan ProgramUtama mengulang ke atas
+                        break; 
 
                     } else {
                         System.out.println("Input tidak valid. Masukkan Y / N");
