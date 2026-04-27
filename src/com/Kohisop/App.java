@@ -6,7 +6,6 @@ public class App {
     public static void main(String[] args) {
         // declare semua variabel
         Scanner in = new Scanner(System.in);
-
         String [][]menu = {
                 {"A1","Caffe Latte","46","Minuman"},
                 {"A2","Cappuccino","46","Minuman"},
@@ -175,52 +174,17 @@ public class App {
             }
             if (!pesananBatal && totalItemPesanan > 0) {
 
+                // Data Dummy, ini yang perlu diganti sama temen-temen (dari variable maupun functionya)
+                String currency = "IDR";
+                String paymentMethod = "Tunai";
+                int diskon = 0;
+                int biayaAdmin = 0;
+                int pajakPerItem = 0; // ini kemungkinan pake while loop buat ngambil per row
+
                 int totalMinumanNoTax = 0;
                 int totalMinumanTax = 0;
                 int totalMakananNoTax = 0;
                 int totalMakananTax = 0;
-                int pajakPerItem = 0; // ini kemungkinan pake while loop buat ngambil per row
-
-                // ini buat logika perubahan currency
-                String currency = "IDR";
-
-                String paymentMethod = "Tunai";
-                int diskon = 0;
-                int biayaAdmin = 0;
-
-                System.out.println("""
-                        Masukkan metode pembayaran yang ingin digunakan:
-                        1. Tunai
-                        2. Qris
-                        3. Emoney
-                        Silahkan masukkan sesuai dengan pilihan atau ketik 'CC' untuk batalkan pesanan: """);
-                String metodeBayar = in.nextLine().toLowerCase();
-                switch (metodeBayar){
-                    case "CC":
-                        System.out.println("Pesanan dibatalkan dan program akan dihentikan");
-                        break MainApp;
-                    case "1":
-                    case "tunai":
-                        // langsung masuk kuitansi tanpa ada penambahan diskon atau admin
-                        break;
-                    case "2":
-                    case "qris":
-//                        if (wallet >= totalTertagih){
-//                            langsung panggil class qris buat ngitung
-//                            side note: yang dihitung dari total tertagih tidak termasuk pajak, jadi semua
-//                            total makanan + minum itu di handle metode bayar lalu baru ditambahkan pajak
-//                        }
-                        break;
-                    case "3":
-                    case "emoney":
-//                        if (wallet >= totalTertagih){
-//                            langsung panggil class qris buat ngitung
-//                            side note: yang dihitung dari total tertagih tidak termasuk pajak, jadi semua
-//                            total makanan + minum itu di handle metode bayar lalu baru ditambahkan pajak
-//                        }
-                        break;
-
-                }
 
                 System.out.println("""
                         +------------------------------------------------------------------+
@@ -248,7 +212,7 @@ public class App {
                         int totalPerItem = keranjangHarga[i] * keranjangJumlah[i];
                         int pajakTotalItem = 0;
 
-                        System.out.printf("%-4s | %-25s | %-3d | %-8d | %-5d | %d\n",
+                        System.out.printf("%-4s | %-25s | %-3d | %-8d | %-5d | %d.000\n",
                                 keranjangKode[i], keranjangNama[i], keranjangJumlah[i], keranjangHarga[i], pajakTotalItem, totalPerItem);
 
                         totalMakananNoTax += totalPerItem;
@@ -280,11 +244,11 @@ public class App {
 
                     if (opsiAkhir.equals("N")) {
                         System.out.println("Program akan ditutup");
-                        break MainApp;
+                        break MainApp; // LANGSUNG MENGHENTIKAN APLIKASI
 
                     } else if (opsiAkhir.equals("Y")) {
                         System.out.println("\nPesanan baru dibuat");
-                        break;
+                        break; // Keluar dari loop Y/N ini saja, membiarkan ProgramUtama mengulang ke atas
 
                     } else {
                         System.out.println("Input tidak valid. Masukkan Y / N");
