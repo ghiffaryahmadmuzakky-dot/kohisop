@@ -244,11 +244,11 @@ public class App {
 
                     if (opsiAkhir.equals("N")) {
                         System.out.println("Program akan ditutup");
-                        break MainApp; // LANGSUNG MENGHENTIKAN APLIKASI
+                        break MainApp;
 
                     } else if (opsiAkhir.equals("Y")) {
                         System.out.println("\nPesanan baru dibuat");
-                        break; // Keluar dari loop Y/N ini saja, membiarkan ProgramUtama mengulang ke atas
+                        break;
 
                     } else {
                         System.out.println("Input tidak valid. Masukkan Y / N");
