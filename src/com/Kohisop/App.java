@@ -98,12 +98,6 @@ public class App {
                         System.out.println("Anda telah mencapai batas pemesanan jenis makanan");
                         break;
                     }
-                    // print item yang udah di list
-                    if (totalItemPesanan > 0) {
-                        System.out.println("\nDaftar item yang sudah di list");
-                        printList(keranjangKode, keranjangNama, keranjangJumlah, keranjangKategori, totalItemPesanan, "Minuman");
-                        printList(keranjangKode, keranjangNama, keranjangJumlah, keranjangKategori, totalItemPesanan, "Makanan");
-                    }
 
                     //jumlah default makanan/minuman = 1
                     int jumlahMenu = 1;
@@ -167,6 +161,11 @@ public class App {
                         if(kategori.equals("Makanan")){jumlahMakanan++;}
 
                         System.out.println(namaMenu + " berjumlahkan " + jumlahMenu + " berhasil ditambahkan\n");
+                        // print item yang udah di list
+
+                        System.out.println("\nDaftar item yang sudah di list");
+                        printList(keranjangKode, keranjangNama, keranjangJumlah, keranjangKategori, totalItemPesanan, "Minuman");
+                        printList(keranjangKode, keranjangNama, keranjangJumlah, keranjangKategori, totalItemPesanan, "Makanan");
                     }
 //
                     break;
