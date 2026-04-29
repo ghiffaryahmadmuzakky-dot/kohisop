@@ -178,6 +178,128 @@ public class App {
             }
             if (!pesananBatal && totalItemPesanan > 0) {
 
+                // TukarUang MataUang = new toIDR(); //Variabel untuk penukaran default "IDR"
+                // boolean valid = false;
+
+                // do {
+                //     //Memilih mata uang yang digunakan
+                //     System.out.println("");
+                //     System.out.println("""
+                //             +--------------------------------------------+
+                //             |             Pilihan Mata Uang              |
+                //             +--------------------------------------------+""");
+                //     System.out.printf("| %-10s | %-12s | %-14s | \n", "Mata Uang", "Nilai Tukar", "Dalam Rupiah");
+                //     System.out.println("+--------------------------------------------+");
+                //     System.out.printf("| %-10s | %-12s | %-14s | \n", "IDR", "1 IDR", "1 IDR");
+                //     System.out.printf("| %-10s | %-12s | %-14s | \n", "USD", "1 USD", "15 IDR");
+                //     System.out.printf("| %-10s | %-12s | %-14s | \n", "JPY", "10 JPY", "1 IDR");
+                //     System.out.printf("| %-10s | %-12s | %-14s | \n", "MYR", "1 MYR", "4 IDR");
+                //     System.out.printf("| %-10s | %-12s | %-14s | \n", "EUR", "1 EUR", "14 IDR");
+                //     System.out.println("+--------------------------------------------+");
+
+                //     System.out.println("\nTulis Mata Uang yang sesuai, contoh 'IDR'");
+                //     System.out.print("Mata uang Anda: ");
+                //     String pilihan = in.nextLine().toUpperCase(); //Biar input user selalu sama seperti case
+
+                //     switch(pilihan) {
+                //         case "IDR":
+                //             MataUang = new toIDR();
+                //             valid = true;
+                //             break;
+                //         case "USD":
+                //             MataUang = new toUSD();
+                //             valid = true;
+                //             break;
+                //         case "JPY":
+                //             MataUang = new toJPY();
+                //             valid = true;
+                //             break;
+                //         case "MYR":
+                //             MataUang = new toMYR();
+                //             valid = true;
+                //             break;
+                //         case "EUR":
+                //             MataUang = new toEUR();
+                //             valid = true;
+                //             break;
+                //         default:
+                //             System.out.println("Pilihan tidak valid, coba lagi!");
+                //     }
+                // } while (!valid);
+
+                // // Data Dummy, ini yang perlu diganti sama temen-temen (dari variable maupun functionya)
+                // String currency = MataUang.getMataUang(); // dapat mata uang yang dipakai
+                // String paymentMethod = "Tunai";
+                // int diskon = 0;
+                // int biayaAdmin = 0;
+                // double pajakPerItem = 0; // ini kemungkinan pake while loop buat ngambil per row
+
+                // double totalMinumanNoTax = 0;
+                // double totalMinumanTax = 0;
+                // double totalMakananNoTax = 0;
+                // double totalMakananTax = 0;
+
+                // System.out.println("");
+                // System.out.println("""
+                //         +------------------------------------------------------------------+
+                //         |                         Kuitansi Kohisop                         |
+                //         +------------------------------------------------------------------+""");
+                // System.out.println("\nDaftar Minuman");
+                // System.out.println("Mata Uang: " + currency);
+                // System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
+                // System.out.println("------------------------------------------------------------------");
+                // for (int i=0; i<totalItemPesanan; i++){
+                //     if (keranjangKategori[i].equals("Minuman")){
+                //         double finalHarga = MataUang.Tukar(keranjangHarga[i]);
+                //         double totalPerItem = keranjangJumlah[i] * finalHarga;
+                //         double pajakTotalItem = 0; // data dummy
+                //         System.out.printf("%-4s | %-25s | %-3d | %-8.2f | %-5.2f | %.2f\n",
+                //                 keranjangKode[i], keranjangNama[i], keranjangJumlah[i], finalHarga, pajakTotalItem, totalPerItem);
+
+                //         totalMinumanNoTax += totalPerItem;
+                //         totalMinumanTax += (totalPerItem + pajakTotalItem);
+                //     }
+                // }
+                // System.out.println("\nDaftar Makanan");
+                // System.out.println("Mata Uang: " + currency);
+                // System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
+                // System.out.println("------------------------------------------------------------------");
+                // for (int i = 0; i < totalItemPesanan; i++) {
+                //     if (keranjangKategori[i].equals("Makanan")) {
+                //         double finalHarga = MataUang.Tukar(keranjangHarga[i]);
+                //         double totalPerItem = finalHarga * keranjangJumlah[i];
+                //         double pajakTotalItem = 0;
+
+                //         System.out.printf("%-4s | %-25s | %-3d | %-8.2f | %-5.2f | %.2f\n",
+                //                 keranjangKode[i], keranjangNama[i], keranjangJumlah[i], finalHarga, pajakTotalItem, totalPerItem);
+
+                //         totalMakananNoTax += totalPerItem;
+                //         totalMakananTax += (totalPerItem + pajakTotalItem);
+                //     }
+                // }
+                // double totalTagihanAwal = totalMinumanNoTax + totalMakananNoTax;
+                // double totalTagihanAkhir = totalMinumanTax + totalMakananNoTax - diskon + biayaAdmin;
+
+                // System.out.println("\n-------------------------------------------------------");
+                // System.out.println("Ringkasan Pembayaran (" + currency + ")");
+                // System.out.println("-------------------------------------------------------");
+                // System.out.printf("%-40s : %.2f\n", "Total Minuman (Tanpa Pajak)", totalMinumanNoTax);
+                // System.out.printf("%-40s : %.2f\n", "Total Minuman (Termasuk Pajak)", totalMinumanTax);
+                // System.out.println("-------------------------------------------------------");
+                // System.out.printf("%-40s : %.2f\n", "Total Makanan (Tanpa Pajak)", totalMakananNoTax);
+                // System.out.printf("%-40s : %.2f\n", "Total Makanan (Termasuk Pajak)", totalMakananTax);
+                // System.out.println("-------------------------------------------------------");
+                // System.out.printf("%-40s : %.2f\n", "Total Tagihan (Sebelum Pajak/Diskon)", totalTagihanAwal);
+                // System.out.printf("%-40s : %d\n", "Diskon Channel Pembayaran", diskon);
+                // System.out.printf("%-40s : %d\n", "Biaya Admin Channel", biayaAdmin);
+                // System.out.printf("%-40s : %s\n", "Metode Pembayaran", paymentMethod);
+                // System.out.println("-------------------------------------------------------");
+                // System.out.printf("%-40s : %s %.2f\n", "Total Tagihan Akhir", currency, totalTagihanAkhir);
+                // System.out.println("-------------------------------------------------------");
+
+                // System.out.println("\n        Terima kasih dan silahkan datang kembali       ");
+                // System.out.println("-------------------------------------------------------\n");
+
                 // Data Dummy, ini yang perlu diganti sama temen-temen (dari variable maupun functionya)
                 String currency = "IDR";
                 String paymentMethod = "Tunai";
