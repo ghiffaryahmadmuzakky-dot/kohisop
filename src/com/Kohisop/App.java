@@ -307,62 +307,68 @@ public class App {
 
                  System.out.println("");
                  System.out.println("""
-                         +------------------------------------------------------------------+
-                         |                         Kuitansi Kohisop                         |
-                         +------------------------------------------------------------------+""");
-                 System.out.println("\nDaftar Minuman");
-                 System.out.println("Mata Uang: " + currency);
-                 System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
-                 System.out.println("------------------------------------------------------------------");
-                 for (int i=0; i<totalItemPesanan; i++){
-                     if (keranjangKategori[i].equals("Minuman")){
-                         double finalHarga = MataUang.Tukar(keranjangHarga[i]);
-                         double totalPerItem = keranjangJumlah[i] * finalHarga;
-                         double pajakTotalItem = 0; // data dummy
-                         System.out.printf("%-4s | %-25s | %-3d | %-8.2f | %-5.2f | %.2f\n",
-                                 keranjangKode[i], keranjangNama[i], keranjangJumlah[i], finalHarga, pajakTotalItem, totalPerItem);
+                        +------------------------------------------------------------------+
+                        |                         Kuitansi Kohisop                         |
+                        +------------------------------------------------------------------+""");
+                System.out.println("\nDaftar Minuman");
+                System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
+                System.out.println("------------------------------------------------------------------");
+                for (int i=0; i<totalItemPesanan; i++){
+                    if (keranjangKategori[i].equals("Minuman")){
+                        int totalPerItem = keranjangJumlah[i] * keranjangHarga[i];
+                        int pajakTotalItem;
+                        if (keranjangHarga[i] < 50 ) {
+                            pajakTotalItem = 0;
+                        } else if (keranjangHarga[i] <= 55) {
+                            pajakTotalItem =  totalPerItem * 8 / 100;
+                        }else  {
+                            pajakTotalItem = totalPerItem * 11 / 100;
+                        }
+                        System.out.printf("%-4s | %-25s | %-3d | %-8d | %-5d | %d\n",
+                                keranjangKode[i], keranjangNama[i], keranjangJumlah[i], keranjangHarga[i], pajakTotalItem, totalPerItem);
 
-                         totalMinumanNoTax += totalPerItem;
-                         totalMinumanTax += (totalPerItem + pajakTotalItem);
-                     }
-                 }
-                 System.out.println("\nDaftar Makanan");
-                 System.out.println("Mata Uang: " + currency);
-                 System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
-                 System.out.println("------------------------------------------------------------------");
-                 for (int i = 0; i < totalItemPesanan; i++) {
-                     if (keranjangKategori[i].equals("Makanan")) {
-                         double finalHarga = MataUang.Tukar(keranjangHarga[i]);
-                         double totalPerItem = finalHarga * keranjangJumlah[i];
-                         double pajakTotalItem = 0;
+                        totalMinumanNoTax += totalPerItem;
+                        totalMinumanTax += (totalPerItem + pajakTotalItem);
+                    }
+                }
+                System.out.println("\nDaftar Makanan");
+                System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
+                System.out.println("------------------------------------------------------------------");
+                for (int i = 0; i < totalItemPesanan; i++) {
+                    if (keranjangKategori[i].equals("Makanan")) {
+                        int totalPerItem = keranjangHarga[i] * keranjangJumlah[i];
+                        int pajakTotalItem;
+                        if (keranjangHarga[i] > 50) {
+                            pajakTotalItem = totalPerItem * 8 / 100;
+                        }else {
+                            pajakTotalItem = totalPerItem * 11 / 100;
+                        }
+                        System.out.printf("%-4s | %-25s | %-3d | %-8d | %-5d | %d\n",
+                                keranjangKode[i], keranjangNama[i], keranjangJumlah[i], keranjangHarga[i], pajakTotalItem, totalPerItem);
 
-                         System.out.printf("%-4s | %-25s | %-3d | %-8.2f | %-5.2f | %.2f\n",
-                                 keranjangKode[i], keranjangNama[i], keranjangJumlah[i], finalHarga, pajakTotalItem, totalPerItem);
+                        totalMakananNoTax += totalPerItem;
+                        totalMakananTax += (totalPerItem + pajakTotalItem);
+                    }
+                }
+                 totalTagihanAwal = totalMinumanNoTax + totalMakananNoTax;
+                 totalTagihanAkhir = totalMinumanTax + totalMakananTax - diskon + biayaAdmin;
 
-                         totalMakananNoTax += totalPerItem;
-                         totalMakananTax += (totalPerItem + pajakTotalItem);
-                     }
-                 }
+                System.out.println("\n-------------------------------------------------------");
+                System.out.println("Ringkasan Pembayaran (" + currency + ")");
+                System.out.println("-------------------------------------------------------");
+                System.out.printf("%-40s : %d\n", "Total Minuman (Tanpa Pajak)", totalMinumanNoTax);
+                System.out.printf("%-40s : %d\n", "Total Minuman (Termasuk Pajak)", totalMinumanTax);
+                System.out.println("-------------------------------------------------------");
+                System.out.printf("%-40s : %d\n", "Total Tagihan (Sebelum Pajak/Diskon)", totalTagihanAwal);
+                System.out.printf("%-40s : %d\n", "Diskon Channel Pembayaran", diskon);
+                System.out.printf("%-40s : %d\n", "Biaya Admin Channel", biayaAdmin);
+                System.out.printf("%-40s : %s\n", "Metode Pembayaran", paymentMethod);
+                System.out.println("-------------------------------------------------------");
+                System.out.printf("%-40s : %s %d\n", "Total Tagihan Akhir", currency, totalTagihanAkhir);
+                System.out.println("-------------------------------------------------------");
 
-                 System.out.println("\n-------------------------------------------------------");
-                 System.out.println("Ringkasan Pembayaran (" + currency + ")");
-                 System.out.println("-------------------------------------------------------");
-                 System.out.printf("%-40s : %.2f\n", "Total Minuman (Tanpa Pajak)", totalMinumanNoTax);
-                 System.out.printf("%-40s : %.2f\n", "Total Minuman (Termasuk Pajak)", totalMinumanTax);
-                 System.out.println("-------------------------------------------------------");
-                 System.out.printf("%-40s : %.2f\n", "Total Makanan (Tanpa Pajak)", totalMakananNoTax);
-                 System.out.printf("%-40s : %.2f\n", "Total Makanan (Termasuk Pajak)", totalMakananTax);
-                 System.out.println("-------------------------------------------------------");
-                 System.out.printf("%-40s : %.2f\n", "Total Tagihan (Sebelum Pajak/Diskon)", totalTagihanAwal);
-                 System.out.printf("%-40s : %d\n", "Diskon Channel Pembayaran", diskon);
-                 System.out.printf("%-40s : %d\n", "Biaya Admin Channel", biayaAdmin);
-                 System.out.printf("%-40s : %s\n", "Metode Pembayaran", paymentMethod);
-                 System.out.println("-------------------------------------------------------");
-                 System.out.printf("%-40s : %s %.2f\n", "Total Tagihan Akhir", currency, totalTagihanAkhir);
-                 System.out.println("-------------------------------------------------------");
-
-                 System.out.println("\n        Terima kasih dan silahkan datang kembali       ");
-                 System.out.println("-------------------------------------------------------\n");
+                System.out.println("\n        Terima kasih dan silahkan datang kembali       ");
+                System.out.println("-------------------------------------------------------\n");
 
                 while (true) {
                     System.out.print("Apakah anda melakukan pemesanan baru? (Y/N): ");
