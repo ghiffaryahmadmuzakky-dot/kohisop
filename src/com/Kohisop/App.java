@@ -249,45 +249,60 @@ public class App {
                         Atau anda bisa mengetik 'CC' untuk membatalkan pesanan dan keluar dari program""");
                 String metodePembayaran = in.nextLine().toLowerCase();
 
-                // ini masih proof of concept, masih bisa salah dan perlu di modif
-                switch (metodePembayaran){
+                switch (metodePembayaran) {
                     case "1":
                     case "qris":
-                        if (qris.wallet > totalTagihanAkhir){
-                            qris.pay(totalTagihanAkhir);
+                        diskon      = (int)(totalTagihanAwal * qris.getDiskon() / 100.0);
+                        biayaAdmin  = qris.getBiayaAdmin();
+                        paymentMethod = qris.getNamaBayar();
+
+                        double totalQris = totalTagihanAwal - diskon + biayaAdmin;
+                        if (qris.wallet >= totalQris) {
+                            qris.pay(totalQris);
                         } else {
                             System.out.println("""
-                                    Wallet tidak cukup, apakah ingin melakukan top up? 
+                                    Wallet tidak cukup, apakah ingin melakukan top up?
                                     Masukkan nominal (IDR) atau 'CC' untuk keluar program""");
                             String nominal = in.nextLine().toUpperCase();
                             if (nominal.equals("CC")) break MainApp;
                             else try {
-                                qris.wallet = Integer.parseInt(nominal);
-                            } catch (Exception e){
+                                qris.topUp(Integer.parseInt(nominal));
+                                qris.pay(totalQris);
+                            } catch (Exception e) {
                                 System.out.println("Masukkan angka bulat atau 'CC' untuk keluar");
                             }
                         }
                         break;
+
                     case "2":
                     case "emoney":
-                        if (emoney.wallet > totalTagihanAkhir){
-                            emoney.pay(totalTagihanAkhir);
+                        diskon      = (int)(totalTagihanAwal * emoney.getDiskon() / 100.0);
+                        biayaAdmin  = emoney.getBiayaAdmin();
+                        paymentMethod = emoney.getNamaBayar();
+
+                        double totalEmoney = totalTagihanAwal - diskon + biayaAdmin;
+                        if (emoney.wallet >= totalEmoney) {
+                            emoney.pay(totalEmoney);
                         } else {
                             System.out.println("""
-                                    Wallet tidak cukup, apakah ingin melakukan top up? 
+                                    Wallet tidak cukup, apakah ingin melakukan top up?
                                     Masukkan nominal (IDR) atau 'CC' untuk keluar program""");
                             String nominal = in.nextLine().toUpperCase();
                             if (nominal.equals("CC")) break MainApp;
                             else try {
-                                emoney.wallet = Integer.parseInt(nominal);
-                            } catch (Exception e){
+                                emoney.topUp(Integer.parseInt(nominal));
+                                emoney.pay(totalEmoney);
+                            } catch (Exception e) {
                                 System.out.println("Masukkan angka bulat atau 'CC' untuk keluar");
                             }
                         }
                         break;
+
                     case "3":
                     case "tunai":
-                        break; // biar langsung ke cetak kuitansi
+                        paymentMethod = "Tunai";
+                        // diskon = 0, biayaAdmin = 0 (sudah default)
+                        break;
                 }
 
                  System.out.println("");

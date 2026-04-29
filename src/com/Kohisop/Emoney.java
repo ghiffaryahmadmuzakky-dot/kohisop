@@ -1,14 +1,36 @@
 package com.Kohisop;
-// ini masih proof of concept, masih bisa salah dan perlu di modif
-public class Emoney extends MetodeBayar{
+
+public class Emoney extends MetodeBayar {
+
+    public Emoney() {
+        this.name = "eMoney";
+        this.wallet = 0;
+    }
 
     @Override
     public void topUp(double amount) {
-        //definisiin
+        this.wallet += amount;
+        System.out.printf("Top up eMoney sebesar %.2f (IDR) berhasil. Saldo: %.2f (IDR)%n", amount, this.wallet);
     }
 
     @Override
     public void pay(double amount) {
-        // definisiin
+        this.wallet -= amount;
+        System.out.printf("Pembayaran eMoney sebesar %.2f (IDR) berhasil. Saldo: %.2f (IDR)%n", amount, this.wallet);
+    }
+
+    @Override
+    public int getDiskon() {
+        return 7; // diskon 7%
+    }
+
+    @Override
+    public int getBiayaAdmin() {
+        return 20; // biaya admin 20 IDR
+    }
+
+    @Override
+    public String getNamaBayar() {
+        return "eMoney";
     }
 }
