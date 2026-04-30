@@ -404,17 +404,21 @@ public class App {
             // buat ngecek ada data atau nggak di dalam list pesanan
             if (arrayKategori[i].equals(kategori)){
                 keranjangTerIsi = true;
+                break;
             }
-            if (!keranjangTerIsi) return;
+        }
+
+        if (!keranjangTerIsi){
+            return;
         }
 
         //ini buat ngeprint
         System.out.println("+------+----------------------------------------+-----------+");
-        System.out.printf("%-5s %-40s %-7s|\n", "| Kode", ("| Nama " + kategori), "| Jumlah");
+        System.out.printf("%-5s %-40s %-12s|\n", "| Kode", ("| Nama " + kategori), "| Jumlah");
         System.out.println("+------+----------------------------------------+-----------+");
         for (int j = 0; j < totalItem; j++) {
             if (arrayKategori[j].equals(kategori)) {
-                System.out.printf("%-5s %-40s %-7d|\n", ("| " + kode[j]), ("| " + nama[j]), qty[j]);
+                System.out.printf("%-5s  %-40s |%-11d|\n", ("| " + kode[j]), ("| " + nama[j]), qty[j]);
             }
         }
         System.out.println("+------+----------------------------------------+-----------+");
