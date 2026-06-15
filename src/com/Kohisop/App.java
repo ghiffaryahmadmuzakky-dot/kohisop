@@ -27,10 +27,10 @@ public class App {
         }
     }
 
-    // --- FUNGSI HELPER ---
+
     static ArrayList<MenuItem> buildMenu() {
         ArrayList<MenuItem> menu = new ArrayList<>();
-        // Minuman
+
         menu.add(new MenuItem("A1", "Caffe Latte", 46, "Minuman"));
         menu.add(new MenuItem("A2", "Cappuccino", 46, "Minuman"));
         menu.add(new MenuItem("E1", "Caffe Americano", 37, "Minuman"));
@@ -42,7 +42,6 @@ public class App {
         menu.add(new MenuItem("B2", "Vanilla Sweet Cream Cold Brew", 50, "Minuman"));
         menu.add(new MenuItem("B3", "Cold Brew", 44, "Minuman"));
 
-        // Makanan
         menu.add(new MenuItem("M1", "Petemania Pizza", 112, "Makanan"));
         menu.add(new MenuItem("M2", "Mie Rebus Super Mario", 35, "Makanan"));
         menu.add(new MenuItem("M3", "Ayam Bakar Goreng Rebus Spesial", 72, "Makanan"));
@@ -121,22 +120,29 @@ public class App {
         return null;
     }
 
-    // === PROGRAM UTAMA ===
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
-        Qris   qris   = new Qris();
+        Qris qris = new Qris();
         Emoney emoney = new Emoney();
 
         ArrayList<MenuItem> menu = buildMenu();
         ArrayList<MenuItem> menuTampil = sortedMenuForDisplay(menu);
 
-        // Database Member (Agar data tersimpan antar transaksi)
         ArrayList<Member> membersDb = new ArrayList<>();
+
+        PriorityQueue<OrderItem> antreanMakanan = new PriorityQueue<>((a, b) -> Integer.compare(b.harga, a.harga));
+        Stack<OrderItem> antreanMinuman = new Stack<>();
+
+        int jumlahPelanggan = 0;
 
         MainApp:
         while (true) {
-            System.out.println("\nSelamat datang dalam aplikasi Kohisop");
-            System.out.println("Berikut merupakan menu yang tersedia pada kafe Kohisop\n");
+            qris.wallet = 0;
+            emoney.wallet = 0;
+
+            System.out.println("\n=======================================================");
+            System.out.println("  Selamat datang dalam aplikasi Kohisop (Pelanggan Ke-" + (jumlahPelanggan + 1) + ")");
+            System.out.println("=======================================================\n");
 
             printMenu("Makanan", menuTampil);
             printMenu("Minuman", menuTampil);
@@ -203,47 +209,33 @@ public class App {
                     String qInput = in.nextLine().trim();
 
                     switch (qInput.toUpperCase()) {
-                        case "CC":
-                            System.out.println("Pesanan dibatalkan dan program akan dihentikan");
-                            break MainApp;
-                        case "":
-                            jumlahMenu = 1;
-                            break LoopQty;
-                        case "0":
-                        case "S":
-                            skip = true;
-                            break LoopQty;
+                        case "CC": break MainApp;
+                        case "": jumlahMenu = 1; break LoopQty;
+                        case "0": case "S": skip = true; break LoopQty;
                     }
 
                     try {
                         jumlahMenu = Integer.parseInt(qInput);
-                        if (jumlahMenu < 1 || jumlahMenu > maxQty) {
-                            System.out.println("Masukkan angka antara 1 dan " + maxQty);
-                        } else {
-                            break LoopQty;
-                        }
+                        if (jumlahMenu >= 1 && jumlahMenu <= maxQty) break LoopQty;
+                        else System.out.println("Masukkan angka antara 1 dan " + maxQty);
                     } catch (NumberFormatException e) {
                         System.out.println("Input tidak valid, masukkan angka / S / Enter");
                     }
                 }
 
-                if (skip) {
-                    System.out.printf("Pesanan %s diskip%n", dipilih.nama);
-                } else {
+                if (!skip) {
                     pesanan.add(new OrderItem(dipilih.kode, dipilih.nama, dipilih.harga, jumlahMenu, dipilih.kategori));
-
                     if (dipilih.kategori.equals("Minuman")) jumlahMinuman++;
                     else jumlahMakanan++;
 
                     System.out.printf("%s (x%d) berhasil ditambahkan%n", dipilih.nama, jumlahMenu);
-
                     LinkedList<OrderItem> sorted = sortedOrderList(pesanan);
                     printOrderTable(sorted, "Makanan");
                     printOrderTable(sorted, "Minuman");
                 }
             }
-
             if (pesanan.isEmpty()) continue;
+
 
             Member currentMember = null;
             int poinSebelumTransaksi = 0;
@@ -270,9 +262,7 @@ public class App {
                 membersDb.add(currentMember);
                 System.out.println("Pendaftaran berhasil! Kode Member Anda: " + kodeBaru);
             }
-            System.out.println("--------------------------------------------");
 
-            // --- FASE 2: KALKULASI PAJAK AWAL (IDR) ---
             boolean bebasPajak = (currentMember != null && currentMember.kode.contains("A"));
             double totalTagihanAwalIDR = 0;
 
@@ -290,16 +280,14 @@ public class App {
                         else persentasePajak = 0.08;
                     }
                 }
-                double pajakItem = subtotal * persentasePajak;
-                totalTagihanAwalIDR += (subtotal + pajakItem);
+                totalTagihanAwalIDR += (subtotal + (subtotal * persentasePajak));
             }
 
-            TukarUang mataUang  = new toIDR();
-            boolean   validCurr = false;
+
+            TukarUang mataUang = new toIDR();
+            boolean validCurr = false;
             do {
                 System.out.println("\n+--------------------------------------------+");
-                System.out.println("|             Pilihan Mata Uang              |");
-                System.out.println("+--------------------------------------------+");
                 System.out.printf("| %-10s | %-12s | %-14s |\n", "Mata Uang", "Nilai Tukar", "Dalam Rupiah");
                 System.out.println("+--------------------------------------------+");
                 System.out.printf("| %-10s | %-12s | %-14s |\n", "IDR", "1 IDR",  "1 IDR");
@@ -308,9 +296,9 @@ public class App {
                 System.out.printf("| %-10s | %-12s | %-14s |\n", "MYR", "1 MYR",  "4 IDR");
                 System.out.printf("| %-10s | %-12s | %-14s |\n", "EUR", "1 EUR",  "14 IDR");
                 System.out.println("+--------------------------------------------+");
-                System.out.print("Mata uang Anda: ");
-                String pil = in.nextLine().trim().toUpperCase();
-                switch (pil) {
+                System.out.print("Mata uang Anda (IDR/USD/JPY/MYR/EUR): ");
+
+                switch (in.nextLine().trim().toUpperCase()) {
                     case "IDR": mataUang = new toIDR(); validCurr = true; break;
                     case "USD": mataUang = new toUSD(); validCurr = true; break;
                     case "JPY": mataUang = new toJPY(); validCurr = true; break;
@@ -319,10 +307,9 @@ public class App {
                     default: System.out.println("Pilihan tidak valid, coba lagi!");
                 }
             } while (!validCurr);
-
             String currency = mataUang.getMataUang();
 
-            // --- FASE 4: PEMOTONGAN POIN (Hanya jika IDR) ---
+
             double potonganPoinIDR = 0;
             int poinTerpakai = 0;
             double totalSisaTagihanIDR = totalTagihanAwalIDR;
@@ -330,7 +317,6 @@ public class App {
             if (currency.equals("IDR") && currentMember != null && currentMember.poin > 0) {
                 double saldoPoinIDR = currentMember.poin * 2.0;
                 System.out.println("\n[Sistem Poin Aktif] Anda memiliki " + currentMember.poin + " poin (Senilai " + saldoPoinIDR + " IDR)");
-
                 if (saldoPoinIDR >= totalSisaTagihanIDR) {
                     potonganPoinIDR = totalSisaTagihanIDR;
                     poinTerpakai = (int) Math.ceil(totalSisaTagihanIDR / 2.0);
@@ -343,17 +329,15 @@ public class App {
                     currentMember.poin = 0;
                 }
                 System.out.println("- Memotong tagihan sebesar: " + potonganPoinIDR + " IDR (" + poinTerpakai + " poin terpakai)");
-            } else if (currentMember != null && currentMember.poin > 0) {
-                System.out.println("\n[Info] Poin tidak dapat memotong tagihan karena Anda tidak menggunakan IDR. (Poin tetap utuh).");
             }
 
-            // --- FASE 5: METODE PEMBAYARAN ---
+
             String paymentMethod = "Tunai";
-            double diskon = 0;
-            double biayaAdmin = 0;
+            double diskon = 0, biayaAdmin = 0;
 
             if (totalSisaTagihanIDR > 0) {
-                System.out.println("\nMasukkan metode pembayaran sisa tagihan:\n1. QRIS\n2. eMoney\n3. Tunai\nAtau ketik 'CC' untuk membatalkan");
+                System.out.println("\nMasukkan metode pembayaran sisa tagihan:");
+                System.out.println("1. QRIS\n2. eMoney\n3. Tunai\nAtau ketik 'CC' untuk membatalkan");
                 String metode = in.nextLine().trim().toLowerCase();
 
                 if (metode.equals("cc")) break MainApp;
@@ -364,11 +348,10 @@ public class App {
                     paymentMethod = qris.getNamaBayar();
                     double totalQ = totalSisaTagihanIDR - diskon + biayaAdmin;
                     while (qris.wallet < totalQ) {
-                        System.out.printf("Wallet tidak cukup. Kurang %.0f IDR. Masukkan nominal top up atau 'CC': ", (totalQ - qris.wallet));
+                        System.out.printf("Wallet kurang %.0f IDR. Top up atau 'CC': ", (totalQ - qris.wallet));
                         String nom = in.nextLine().toUpperCase();
                         if (nom.equals("CC")) break MainApp;
-                        try { qris.topUp(Integer.parseInt(nom)); }
-                        catch (Exception e) { System.out.println("Input tidak valid"); }
+                        try { qris.topUp(Double.parseDouble(nom)); } catch (Exception e) {}
                     }
                     qris.pay(totalQ);
                 }
@@ -378,15 +361,12 @@ public class App {
                     paymentMethod = emoney.getNamaBayar();
                     double totalE = totalSisaTagihanIDR - diskon + biayaAdmin;
                     while (emoney.wallet < totalE) {
-                        System.out.printf("Wallet tidak cukup. Kurang %.0f IDR. Masukkan nominal top up atau 'CC': ", (totalE - emoney.wallet));
+                        System.out.printf("Wallet kurang %.0f IDR. Top up atau 'CC': ", (totalE - emoney.wallet));
                         String nom = in.nextLine().toUpperCase();
                         if (nom.equals("CC")) break MainApp;
-                        try { emoney.topUp(Integer.parseInt(nom)); }
-                        catch (Exception e) { System.out.println("Input tidak valid"); }
+                        try { emoney.topUp(Double.parseDouble(nom)); } catch (Exception e) {}
                     }
                     emoney.pay(totalE);
-                } else {
-                    paymentMethod = "Tunai";
                 }
             } else {
                 paymentMethod = "Poin Penuh";
@@ -394,7 +374,7 @@ public class App {
 
             double totalTagihanAkhirIDR = totalSisaTagihanIDR - diskon + biayaAdmin;
 
-            // --- FASE 6: CASHBACK POIN ---
+
             int poinDidapat = 0;
             if (currentMember != null) {
                 poinDidapat = (int)(totalTagihanAkhirIDR / 10);
@@ -402,7 +382,7 @@ public class App {
                 currentMember.poin += poinDidapat;
             }
 
-            // --- FASE 7: CETAK KUITANSI ---
+
             LinkedList<OrderItem> sortedPesanan = sortedOrderList(pesanan);
 
             System.out.println("\n+------------------------------------------------------------------+");
@@ -425,7 +405,6 @@ public class App {
                 if (!oi.kategori.equals("Makanan")) continue;
                 double hargaKonv = mataUang.Tukar(oi.harga);
                 double subtotal  = hargaKonv * oi.jumlah;
-
                 double persentasePajak = (!bebasPajak) ? ((oi.harga <= 50) ? 0.11 : 0.08) : 0;
                 double pajak = subtotal * persentasePajak;
 
@@ -433,7 +412,6 @@ public class App {
                 totalMakananNoTax += subtotal;
                 totalMakananTax   += subtotal + pajak;
             }
-            System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
 
             System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
             System.out.printf("| %-4s | %-34s | %-9s | %-7s | %-8s | %-8s |\n", "Kode", "Nama Minuman", "Hrg/Porsi", "Jumlah", "Pajak", "Subtotal");
@@ -442,7 +420,6 @@ public class App {
                 if (!oi.kategori.equals("Minuman")) continue;
                 double hargaKonv = mataUang.Tukar(oi.harga);
                 double subtotal  = hargaKonv * oi.jumlah;
-
                 double persentasePajak = 0;
                 if (!bebasPajak) {
                     if (oi.harga < 50) persentasePajak = 0;
@@ -457,13 +434,11 @@ public class App {
             }
             System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
 
-            // Mengakumulasi Total Akhir (Konversi)
             double sumPajakKonv = (totalMakananTax - totalMakananNoTax) + (totalMinumanTax - totalMinumanNoTax);
             double totalTagihanAwalKonv = totalMakananNoTax + totalMinumanNoTax;
             double diskonKonv = mataUang.Tukar(diskon);
             double adminKonv = mataUang.Tukar(biayaAdmin);
             double poinKonv = mataUang.Tukar(potonganPoinIDR);
-
             double totalAkhirKonv = totalTagihanAwalKonv + sumPajakKonv - poinKonv - diskonKonv + adminKonv;
 
             System.out.println("\n-------------------------------------------------------");
@@ -492,16 +467,74 @@ public class App {
                 System.out.println("------------------------------");
             }
 
-            System.out.println("\n        Terima kasih dan silahkan datang kembali       ");
-            System.out.println("-------------------------------------------------------\n");
+
+            jumlahPelanggan++;
+            for (OrderItem oi : pesanan) {
+                if (oi.kategori.equals("Makanan")) {
+                    antreanMakanan.add(oi);
+                } else {
+                    antreanMinuman.push(oi);
+                }
+            }
+
+
+            if (jumlahPelanggan == 3) {
+                System.out.println("\n=======================================================");
+                System.out.println("   KASIR SELESAI (3 PELANGGAN)! PESANAN DIKIRIM KE DAPUR   ");
+                System.out.println("=======================================================");
+
+                System.out.println("\n[DAPUR MAKANAN] - Diproses Berdasarkan Prioritas Harga Tertinggi");
+                while (!antreanMakanan.isEmpty()) {
+                    OrderItem item = antreanMakanan.poll();
+                    System.out.printf("Sedang Memasak : %-30s (x%d) - Harga: Rp%d\n", item.nama, item.jumlah, item.harga);
+                }
+
+                System.out.println("\n[DAPUR MINUMAN] - Diproses Berdasarkan Last-Ordered-First-Served (Stack)");
+                while (!antreanMinuman.isEmpty()) {
+                    OrderItem item = antreanMinuman.pop();
+                    System.out.printf("Sedang Meracik : %-30s (x%d)\n", item.nama, item.jumlah);
+                }
+
+                System.out.println("\n=======================================================");
+                System.out.println("           SEMUA PESANAN SELESAI DIPROSES!             ");
+                System.out.println("=======================================================\n");
+
+                // Reset penghitung pelanggan
+                jumlahPelanggan = 0;
+            } else {
+                System.out.println("\n(Pesanan disimpan di dapur. Menunggu " + (3 - jumlahPelanggan) + " pelanggan lagi untuk diproses...)");
+            }
 
             while (true) {
-                System.out.print("Apakah anda melakukan pemesanan baru? (Y/N): ");
+                System.out.print("\nApakah ada antrean pelanggan baru? (Y/N): ");
                 String opsi = in.nextLine().trim().toUpperCase();
-                if      (opsi.equals("N")) { System.out.println("Program akan ditutup"); break MainApp; }
-                else if (opsi.equals("Y")) { System.out.println("\nPesanan baru dibuat"); break; }
-                else                        { System.out.println("Input tidak valid. Masukkan Y / N"); }
+                if (opsi.equals("N")) {
+                    // Jika toko tutup tapi masih ada pesanan nanggung di dapur, proses paksa
+                    if (jumlahPelanggan > 0) {
+                        System.out.println("\n[INFO] Toko tutup. Memproses sisa " + jumlahPelanggan + " pesanan yang ada di dapur secara paksa...");
+                        System.out.println("\n[DAPUR MAKANAN] Sisa");
+                        while (!antreanMakanan.isEmpty()) {
+                            OrderItem item = antreanMakanan.poll();
+                            System.out.printf("Sedang Memasak : %-30s (x%d)\n", item.nama, item.jumlah);
+                        }
+                        System.out.println("\n[DAPUR MINUMAN] Sisa");
+                        while (!antreanMinuman.isEmpty()) {
+                            OrderItem item = antreanMinuman.pop();
+                            System.out.printf("Sedang Meracik : %-30s (x%d)\n", item.nama, item.jumlah);
+                        }
+                    }
+                    System.out.println("\nProgram Kasir KohiSop Ditutup. Terima Kasih!");
+                    break MainApp;
+                }
+                else if (opsi.equals("Y")) {
+                    System.out.println("\nMelayani pelanggan baru...");
+                    break;
+                }
+                else {
+                    System.out.println("Input tidak valid. Masukkan Y / N");
+                }
             }
         }
+        in.close();
     }
 }
