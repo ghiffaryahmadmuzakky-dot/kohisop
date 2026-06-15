@@ -1,4 +1,4 @@
-package com.Kohisop;
+package com.Kohisop.payment;
 
 public class Qris extends MetodeBayar {
 

@@ -1,7 +1,7 @@
-package com.Kohisop;
+package com.Kohisop.payment;
 
 public abstract class MetodeBayar {
-    protected double wallet;
+    public double wallet;
     protected String name;
 
     public abstract void topUp(double amount);

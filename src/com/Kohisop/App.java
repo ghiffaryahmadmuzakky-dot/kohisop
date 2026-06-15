@@ -1,5 +1,9 @@
 package com.Kohisop;
 
+import com.Kohisop.currency.*;
+import com.Kohisop.payment.Emoney;
+import com.Kohisop.payment.Qris;
+
 import java.util.Scanner;
 
 public class App {

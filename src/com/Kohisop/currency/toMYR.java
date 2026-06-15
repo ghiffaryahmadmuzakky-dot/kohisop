@@ -1,6 +1,6 @@
-package com.Kohisop;
-public class toUSD extends TukarUang {
-    private final double rate = 15;
+package com.Kohisop.currency;
+public class toMYR extends TukarUang {
+    private final double rate = 4;
 
     @Override
     public double Tukar(double Total){
@@ -9,6 +9,6 @@ public class toUSD extends TukarUang {
 
     @Override
     public String getMataUang() {
-        return "USD";
+        return "MYR";
     }
 }

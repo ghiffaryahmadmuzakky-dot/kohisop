@@ -1,4 +1,4 @@
-package com.Kohisop;
+package com.Kohisop.currency;
 public class toEUR extends TukarUang {
     private final double rate = 14;
 

@@ -1,4 +1,4 @@
-package com.Kohisop;
+package com.Kohisop.currency;
 
 public class toIDR extends TukarUang {
     @Override
