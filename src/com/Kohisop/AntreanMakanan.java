@@ -3,6 +3,7 @@ import java.util.PriorityQueue;
 
 
 public class AntreanMakanan {
+    
 class daftarMakanan implements Comparable<daftarMakanan> {
     String nama;
     int harga;
@@ -20,7 +21,6 @@ class daftarMakanan implements Comparable<daftarMakanan> {
     }
 }
 
-public class AntreanMakanan {
     private final PriorityQueue<daftarMakanan> antrean;
 
     public AntreanMakanan() {
@@ -46,5 +46,4 @@ public class AntreanMakanan {
     public boolean isEmpty() {
         return antrean.isEmpty();
     }
-}
 }
