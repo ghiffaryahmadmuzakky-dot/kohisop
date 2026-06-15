@@ -66,9 +66,31 @@ public class DapurService {
         while (!antreanMinuman.isEmpty()) {
             // pop() menyedot dan menghapus elemen yang masuk paling akhir
             OrderItem minuman = antreanMinuman.pop();
-            System.out.printf("%d. %-30s x%d\n", noMinum++, minuman.nama, minuman.jumlah);
+            System.out.printf("%d. %-30s x%d  (Rp%d/porsi)\n", noMinum++, minuman.nama, minuman.jumlah, minuman.harga);
         }
         System.out.println("=======================================================\n");
+    }
+
+    public void intipMinumanTeratas() {
+        if (!antreanMinuman.isEmpty()) {
+            OrderItem teratas = antreanMinuman.peek();
+            System.out.printf("\n[INFO DAPUR] Minuman teratas yang akan dibuat duluan: %s x%d\n", teratas.nama, teratas.jumlah);
+        } else {
+            System.out.println("\n[INFO DAPUR] Antrean minuman saat ini sedang kosong.");
+        }
+    }
+
+    public void batalkanMinumanTerakhir() {
+        if (!antreanMinuman.isEmpty()) {
+            OrderItem dibatalkan = antreanMinuman.pop();
+            System.out.printf("\n[BATAL PESANAN] '%s x%d' berhasil dikeluarkan dari tumpukan minuman dapur.\n", dibatalkan.nama, dibatalkan.jumlah);
+        } else {
+            System.out.println("\n[BATAL PESANAN] Gagal membatalkan, antrean minuman kosong.");
+        }
+    }
+
+    public int getJumlahAntreanMinuman() {
+        return antreanMinuman.size();
     }
 
     // Fungsi darurat jika Kasir menekan 'N' (Tutup Toko) padahal belum mencapai 3 pelanggan
