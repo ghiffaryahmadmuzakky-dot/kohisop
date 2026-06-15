@@ -140,6 +140,39 @@ public class App {
 
         Qris   qris   = new Qris();
         Emoney emoney = new Emoney();
+        String [][]menu = {
+                {"A1","Caffe Latte","46","Minuman"},
+                {"A2","Cappuccino","46","Minuman"},
+                {"E1","Caffe Americano","37","Minuman"},
+                {"E2","Caffe Mocha","55","Minuman"},
+                {"E3","Caramel Macchiato","59","Minuman"},
+                {"E4","Asian Dolce Latte","55","Minuman"},
+                {"E5","Double Shots Iced Shaken Espresso","50","Minuman"},
+                {"B1","Freshly Brewed Coffee","23","Minuman"},
+                {"B2","Vanilla Sweet Cream Cold Brew","50","Minuman"},
+                {"B3","Cold Brew","44","Minuman"},
+                {"M1","Petemania Pizza","112","Makanan"},
+                {"M2","Mie Rebus Super Mario","35","Makanan"},
+                {"M3","Ayam Bakar Goreng Rebus Spesial","72","Makanan"},
+                {"M4","Soto Kambing Iga Guling","124","Makanan"},
+                {"S1","Singkong Bakar A La Carte","37","Makanan"},
+                {"S2","Ubi Cilembu Bakar Arang","58","Makanan"},
+                {"S3","Tempe Mendoan","18","Makanan"},
+                {"S4","Tahu Bakso Extra Telur","28","Makanan"}
+        };
+
+        //untuk mengakumulasi antrean dapur dari semua pelanggan sebelum di proses
+        AntreanMakanan antreanMakanan = new AntreanMakanan();
+
+        //kasir melayani setelah 3 pelanggan memesan
+        //biar aplikasi tetep berjalan walau exception keterkecuali ada "CC"
+        MainApp: for (int pelanggan = 1; pelanggan <= 3; pelanggan++){
+
+            // header judul menu & pelanggan
+            System.out.println();
+            System.out.println("== Pelanggan ke-" + pelanggan + "==");
+            System.out.print("Selamat datang dalam aplikasi Kohisop\n");
+            System.out.print("Berikut merupakan menu yang tersedia pada kafe Kohisop\n\n");
 
        
         ArrayList<MenuItem> menu      = buildMenu();
@@ -268,7 +301,68 @@ public class App {
                 }
             }
 
-            if (pesanan.isEmpty()) continue;
+                //totaal tagihan dihitung setelah loop pajak
+                double totalTagihanAwal = totalMinumanNoTax + totalMakananNoTax;
+
+                //reset semua saldo dari metode bayar yang menggunakan e wallet
+                qris.wallet = 0;
+                emoney.wallet = 0;
+
+                System.out.println("""
+                        Masukkan metode pembayaran yang ingin digunakan:
+                        1. Qris
+                        2. Emoney
+                        3. Tunai
+                        Atau anda bisa mengetik 'CC' untuk membatalkan pesanan dan keluar dari program""");
+                String metodePembayaran = in.nextLine().toLowerCase();
+
+                switch (metodePembayaran) {
+                    case "1":
+                    case "qris":
+                        diskon = totalTagihanAwal * qris.getDiskon() / 100.0;
+                        paymentMethod = qris.getNamaBayar();
+                        double totalTertagih = totalMinumanTax + totalMakananTax - diskon;
+
+                        while(qris.wallet < totalTertagih){
+                            System.out.printf("Saldo kurang %.0f. Top up (Ketik 'CC' batal): ", (totalTertagih - qris.wallet));
+                            String nominal = in.nextLine().toUpperCase();
+                            if(nominal.equals("CC")) break MainApp;
+                            try {
+                                qris.topUp(Double.parseDouble(nominal));
+                            } catch(Exception e){
+                                System.out.println("masukkan saldo yang valid");
+                            }
+                        }
+                        qris.pay(totalTertagih);
+                        break;
+
+                    case "2":
+                    case "emoney":
+                        diskon = totalTagihanAwal * emoney.getDiskon() / 100.0;
+                        biayaAdmin = emoney.getBiayaAdmin();
+                        paymentMethod = emoney.getNamaBayar();
+                        double totalTertagihEmoney = totalMinumanTax + totalMakananTax - diskon + biayaAdmin;
+
+                        while(emoney.wallet < totalTertagihEmoney){
+                            System.out.printf("Saldo kurang %.0f. Top up (Ketik 'CC' batal): ", (totalTertagihEmoney - emoney.wallet));
+                            String nominal = in.nextLine();
+                            if(nominal.equalsIgnoreCase("CC")) {
+                                break MainApp;
+                            }
+                            try {
+                                emoney.topUp(Double.parseDouble(nominal));
+                            }catch(Exception e){
+                                System.out.println("masukkan saldo yang valid");
+                            }
+                        }
+                        emoney.pay(totalTertagihEmoney);
+                        break;
+
+                    case "3":
+                    case "tunai":
+                        paymentMethod = "Tunai";
+                        break;
+                }
 
             // Pilih mata uang
             TukarUang mataUang  = new toIDR();
@@ -305,6 +399,32 @@ public class App {
             double totalIDR = 0;
             for (OrderItem oi : pesanan) totalIDR += (double) oi.harga * oi.jumlah;
 
+                if (pelanggan<3) {
+                    System.out.println("Lanjut ke pelanggan berikutnya ...\n");
+                }
+            }
+        }
+
+        //fase di dapur
+        System.out.println("\n========================================");
+        System.out.println("   KASIR SELESAI! PESANAN DIKIRIM...   ");
+        System.out.println("========================================\n");
+
+        if (!antreanMakanan.isEmpty()) {
+            antreanMakanan.prosesAntrian();
+            System.out.println();
+        }
+        if (!antreanMinuman.isEmpty()) {
+            antreanMinuman.prosesAntrian();
+            System.out.println();
+        }
+
+        System.out.println("========================================");
+        System.out.println("   SEMUA PESANAN SELESAI DIPROSES!     ");
+        System.out.println("========================================");
+
+        in.close();
+    }
             // Metode pembayaran
             String paymentMethod = "Tunai";
             int    diskon        = 0;
