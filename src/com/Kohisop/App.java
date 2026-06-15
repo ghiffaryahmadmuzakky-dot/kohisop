@@ -35,11 +35,16 @@ public class App {
                 {"S4","Tahu Bakso Extra Telur","28","Makanan"}
         };
 
-        //biar aplikasi tetep berjalan walau exception keterkecuali ada "CC"
-        MainApp: while(true){
+        //untuk mengakumulasi antrean dapur dari semua pelanggan sebelum di proses
+        AntreanMakanan antreanMakanan = new AntreanMakanan();
 
-            // header judul menu
+        //kasir melayani setelah 3 pelanggan memesan
+        //biar aplikasi tetep berjalan walau exception keterkecuali ada "CC"
+        MainApp: for (int pelanggan = 1; pelanggan <= 3; pelanggan++){
+
+            // header judul menu & pelanggan
             System.out.println();
+            System.out.println("== Pelanggan ke-" + pelanggan + "==");
             System.out.print("Selamat datang dalam aplikasi Kohisop\n");
             System.out.print("Berikut merupakan menu yang tersedia pada kafe Kohisop\n\n");
 
@@ -267,6 +272,13 @@ public class App {
                     keranjangSubtotal[i] = subtotal;
                 }
 
+                //totaal tagihan dihitung setelah loop pajak
+                double totalTagihanAwal = totalMinumanNoTax + totalMakananNoTax;
+
+                //reset semua saldo dari metode bayar yang menggunakan e wallet
+                qris.wallet = 0;
+                emoney.wallet = 0;
+
                 System.out.println("""
                         Masukkan metode pembayaran yang ingin digunakan:
                         1. Qris
@@ -366,26 +378,31 @@ public class App {
                 System.out.printf("%-40s : %s %.2f\n", "Total Tagihan Akhir", currency, MataUang.Tukar(totalMinumanTax + totalMakananTax - diskon + biayaAdmin));
                 System.out.println("-------------------------------------------------------\n");
 
-                while (true) {
-                    System.out.print("Apakah anda melakukan pemesanan baru? (Y/N): ");
-                    String opsiAkhir = in.nextLine().toUpperCase();
-
-                    if (opsiAkhir.equals("N")) {
-                        System.out.println("Program akan ditutup");
-                        break MainApp;
-
-                    } else if (opsiAkhir.equals("Y")) {
-                        System.out.println("\nPesanan baru dibuat");
-                        break;
-
-                    } else {
-                        System.out.println("Input tidak valid. Masukkan Y / N");
-                    }
+                if (pelanggan<3) {
+                    System.out.println("Lanjut ke pelanggan berikutnya ...\n");
                 }
-
             }
-
         }
+
+        //fase di dapur
+        System.out.println("\n========================================");
+        System.out.println("   KASIR SELESAI! PESANAN DIKIRIM...   ");
+        System.out.println("========================================\n");
+
+        if (!antreanMakanan.isEmpty()) {
+            antreanMakanan.prosesAntrian();
+            System.out.println();
+        }
+        if (!antreanMinuman.isEmpty()) {
+            antreanMinuman.prosesAntrian();
+            System.out.println();
+        }
+
+        System.out.println("========================================");
+        System.out.println("   SEMUA PESANAN SELESAI DIPROSES!     ");
+        System.out.println("========================================");
+
+        in.close();
     }
 
     public static void printMenu(String kategori, String[][] menu) {
