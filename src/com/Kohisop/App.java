@@ -1,430 +1,438 @@
 package com.Kohisop;
-
 import com.Kohisop.currency.*;
 import com.Kohisop.payment.Emoney;
 import com.Kohisop.payment.Qris;
-
-import java.util.Scanner;
+import java.util.*;
 
 public class App {
+
+
+    static class MenuItem {
+        String kode;
+        String nama;
+        int    harga;
+        String kategori; //Minuman Makanan
+
+        MenuItem(String kode, String nama, int harga, String kategori) {
+            this.kode     = kode;
+            this.nama     = nama;
+            this.harga    = harga;
+            this.kategori = kategori;
+        }
+    }
+
+
+    static class OrderItem {
+        String kode;
+        String nama;
+        int    harga;
+        int    jumlah;
+        String kategori;
+
+        OrderItem(String kode, String nama, int harga, int jumlah, String kategori) {
+            this.kode     = kode;
+            this.nama     = nama;
+            this.harga    = harga;
+            this.jumlah   = jumlah;
+            this.kategori = kategori;
+        }
+    }
+
+    static ArrayList<MenuItem> buildMenu() {
+        ArrayList<MenuItem> menu = new ArrayList<>();
+
+        // Minuman bre
+        menu.add(new MenuItem("A1", "Caffe Latte", 46, "Minuman"));
+        menu.add(new MenuItem("A2", "Cappuccino", 46, "Minuman"));
+        menu.add(new MenuItem("E1", "Caffe Americano", 37, "Minuman"));
+        menu.add(new MenuItem("E2", "Caffe Mocha", 55, "Minuman"));
+        menu.add(new MenuItem("E3", "Caramel Macchiato", 59, "Minuman"));
+        menu.add(new MenuItem("E4", "Asian Dolce Latte", 55, "Minuman"));
+        menu.add(new MenuItem("E5", "Double Shots Iced Shaken Espresso", 50, "Minuman"));
+        menu.add(new MenuItem("B1", "Freshly Brewed Coffee", 23, "Minuman"));
+        menu.add(new MenuItem("B2", "Vanilla Sweet Cream Cold Brew", 50, "Minuman"));
+        menu.add(new MenuItem("B3", "Cold Brew", 44, "Minuman"));
+
+        // Makanan bre 
+        menu.add(new MenuItem("M1", "Petemania Pizza", 112, "Makanan"));
+        menu.add(new MenuItem("M2", "Mie Rebus Super Mario", 35, "Makanan"));
+        menu.add(new MenuItem("M3", "Ayam Bakar Goreng Rebus Spesial", 72, "Makanan"));
+        menu.add(new MenuItem("M4", "Soto Kambing Iga Guling", 124, "Makanan"));
+        menu.add(new MenuItem("S1", "Singkong Bakar A La Carte", 37, "Makanan"));
+        menu.add(new MenuItem("S2", "Ubi Cilembu Bakar Arang", 58, "Makanan"));
+        menu.add(new MenuItem("S3", "Tempe Mendoan", 18, "Makanan"));
+        menu.add(new MenuItem("S4", "Tahu Bakso Extra Telur", 28, "Makanan"));
+
+        return menu;
+    }
+
+    static ArrayList<MenuItem> sortedMenuForDisplay(ArrayList<MenuItem> menu) {
+        ArrayList<MenuItem> sorted = new ArrayList<>(menu);
+        sorted.sort((a, b) -> {
+            // "Makanan".compareTo("Minuman") < 0,
+            // kita balik (-katCmp) agar Minuman tampil duluan
+            int katCmp = a.kategori.compareTo(b.kategori);
+            if (katCmp != 0) return -katCmp;
+            return a.kode.compareTo(b.kode);
+        });
+        return sorted;
+    }
+
+    static LinkedList<OrderItem> sortedOrderList(LinkedList<OrderItem> pesanan) {
+        LinkedList<OrderItem> sorted = new LinkedList<>(pesanan);
+        sorted.sort((a, b) -> {
+            // "Makanan" < "Minuman" => Makanan muncul lebih dulu (ascending)
+            int katCmp = a.kategori.compareTo(b.kategori);
+            if (katCmp != 0) return katCmp;
+            return Integer.compare(a.harga, b.harga);
+        });
+        return sorted;
+    }
+
+    static void printMenu(String kategori, ArrayList<MenuItem> sortedMenu) {
+        System.out.println("+------+------------------------------------+-----------+");
+        System.out.printf("| %-4s | %-34s | %-9s |\n",
+                "Kode", "Nama " + kategori, "Harga(Rp)");
+        System.out.println("+------+------------------------------------+-----------+");
+        for (MenuItem item : sortedMenu) {
+            if (!item.kategori.equals(kategori)) continue;
+            System.out.printf("| %-4s | %-34s | %-9d |\n",
+                    item.kode, item.nama, item.harga);
+        }
+        System.out.println("+------+------------------------------------+-----------+");
+        System.out.println();
+    }
+
+
+    static void printOrderList(LinkedList<OrderItem> pesanan) {
+        if (pesanan.isEmpty()) return;
+
+        LinkedList<OrderItem> sorted = sortedOrderList(pesanan);
+
+        System.out.println("\nDaftar item yang sudah dipesan:");
+        System.out.println("+------+------------------------------------+-----------+---------+");
+        System.out.printf("| %-4s | %-34s | %-9s | %-7s |\n",
+                "Kode", "Nama Menu", "Harga", "Jumlah");
+        System.out.println("+------+------------------------------------+-----------+---------+");
+
+        String lastKat = "";
+        for (OrderItem oi : sorted) {
+            if (!oi.kategori.equals(lastKat)) {
+                System.out.printf("| >> %-56s |\n", "[" + oi.kategori + "]");
+                lastKat = oi.kategori;
+            }
+            System.out.printf("| %-4s | %-34s | %-9d | %-7d |\n",
+                    oi.kode, oi.nama, oi.harga, oi.jumlah);
+        }
+        System.out.println("+------+------------------------------------+-----------+---------+");
+    }
+
+ 
+    static MenuItem findMenu(String kode, ArrayList<MenuItem> menu) {
+        for (MenuItem m : menu) {
+            if (m.kode.equalsIgnoreCase(kode)) return m;
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
-        // declare semua variabel
         Scanner in = new Scanner(System.in);
 
-        // instansiasi class metodeBayar
-        Qris qris = new Qris();
+        Qris   qris   = new Qris();
         Emoney emoney = new Emoney();
-        String [][]menu = {
-                {"A1","Caffe Latte","46","Minuman"},
-                {"A2","Cappuccino","46","Minuman"},
-                {"E1","Caffe Americano","37","Minuman"},
-                {"E2","Caffe Mocha","55","Minuman"},
-                {"E3","Caramel Macchiato","59","Minuman"},
-                {"E4","Asian Dolce Latte","55","Minuman"},
-                {"E5","Double Shots Iced Shaken Espresso","50","Minuman"},
-                {"B1","Freshly Brewed Coffee","23","Minuman"},
-                {"B2","Vanilla Sweet Cream Cold Brew","50","Minuman"},
-                {"B3","Cold Brew","44","Minuman"},
-                {"M1","Petemania Pizza","112","Makanan"},
-                {"M2","Mie Rebus Super Mario","35","Makanan"},
-                {"M3","Ayam Bakar Goreng Rebus Spesial","72","Makanan"},
-                {"M4","Soto Kambing Iga Guling","124","Makanan"},
-                {"S1","Singkong Bakar A La Carte","37","Makanan"},
-                {"S2","Ubi Cilembu Bakar Arang","58","Makanan"},
-                {"S3","Tempe Mendoan","18","Makanan"},
-                {"S4","Tahu Bakso Extra Telur","28","Makanan"}
-        };
 
-        //biar aplikasi tetep berjalan walau exception keterkecuali ada "CC"
-        MainApp: while(true){
+       
+        ArrayList<MenuItem> menu      = buildMenu();
+        
+        ArrayList<MenuItem> menuTampil = sortedMenuForDisplay(menu);
 
-            // header judul menu
+      
+        MainApp:
+        while (true) {
+
+            // Tampilan menu
             System.out.println();
-            System.out.print("Selamat datang dalam aplikasi Kohisop\n");
-            System.out.print("Berikut merupakan menu yang tersedia pada kafe Kohisop\n\n");
+            System.out.println("Selamat datang dalam aplikasi Kohisop");
+            System.out.println("Berikut merupakan menu yang tersedia pada kafe Kohisop\n");
+            printMenu("Minuman", menuTampil);
+            printMenu("Makanan", menuTampil);
 
-            // updated: karena tabel makanan & minuman sama, bikin fungsi buat nampilin jadi 1
-            printMenu("Minuman", menu);
-            printMenu("Makanan", menu);
-
-            System.out.println();
             System.out.println("Silahkan masukkan kode pesanan");
             System.out.println("Catatan: Max 5 jenis makanan dan 5 jenis minuman berbeda");
             System.out.println("Ketik 'SELESAI' apabila telah melakukan pemesanan");
             System.out.println("Untuk keluar dari program ketik: 'CC'");
 
-            // nyimpen buat output di kuitansi
-            String[] keranjangKode = new String[10];
-            String[] keranjangNama = new String[10];
-            int[] keranjangHarga = new int[10];
-            int[] keranjangJumlah = new int[10];
-            String[] keranjangKategori = new String[10];
-            int totalItemPesanan = 0;
-
-            // ini nanti buat ngecek batasan
+            // LinkedList nya bray
+            LinkedList<OrderItem> pesanan = new LinkedList<>();
             int jumlahMakanan = 0;
             int jumlahMinuman = 0;
 
-            // buat ngedeteksi proses pesanan selesai apa belum
-            boolean pesananBatal = false;
-
-            LoopPesanan: while (true){
+            // Loop pemilihan menu 
+            LoopPesanan:
+            while (true) {
                 System.out.print("\nMasukkan kode: ");
-                String kodePesanan = in.nextLine().toUpperCase();
+                String input = in.nextLine().trim().toUpperCase();
 
-                if (kodePesanan.equals("CC")){
+                if (input.equals("CC")) {
                     System.out.println("Pesanan dibatalkan dan program akan dihentikan");
                     break MainApp;
-                } else if (kodePesanan.equals("SELESAI")){
-                    if (totalItemPesanan == 0) {
-                        System.out.println("Silahkan masukkan pesanan atau batal dengan ketik 'CC'");
-                        continue LoopPesanan;
-                    }
-                    break LoopPesanan; // biar langsung ke kuitansi
                 }
 
-                boolean kodeValid = false;
-                for (int i=0; i< menu.length;i++){
-                    // ganti if statement biar nggak pake curly bracket
-                    if (!kodePesanan.equals(menu[i][0])) continue;
-
-                    kodeValid = true;
-                    String namaMenu = menu[i][1];
-                    int harga = Integer.parseInt(menu[i][2]);
-                    String kategori = menu[i][3];
-
-                    if (kategori.equals("Minuman") && jumlahMinuman >= 5){
-                        System.out.println("Anda telah mencapai batas pemesanan jenis minuman");
-                        break;
+                if (input.equals("SELESAI")) {
+                    if (pesanan.isEmpty()) {
+                        System.out.println("Silahkan masukkan pesanan atau batal dengan ketik 'CC'");
+                        continue;
                     }
-                    if (kategori.equals("Makanan") && jumlahMakanan >= 5){
-                        System.out.println("Anda telah mencapai batas pemesanan jenis makanan");
-                        break;
+                    break LoopPesanan;
+                }
+
+                // Validasi kode
+                MenuItem dipilih = findMenu(input, menu);
+                if (dipilih == null) {
+                    System.out.println("Kode tidak valid! Masukkan kode yang tersedia di menu.");
+                    continue;
+                }
+
+                // Cek duplikat
+                boolean sudahAda = false;
+                for (OrderItem oi : pesanan) {
+                    if (oi.kode.equals(dipilih.kode)) { sudahAda = true; break; }
+                }
+                if (sudahAda) {
+                    System.out.println("Item " + dipilih.nama + " sudah ada dalam pesanan.");
+                    continue;
+                }
+
+                // Batas 5 bray
+                if (dipilih.kategori.equals("Minuman") && jumlahMinuman >= 5) {
+                    System.out.println("Anda telah mencapai batas 5 jenis minuman.");
+                    continue;
+                }
+                if (dipilih.kategori.equals("Makanan") && jumlahMakanan >= 5) {
+                    System.out.println("Anda telah mencapai batas 5 jenis makanan.");
+                    continue;
+                }
+
+
+                int     jumlahMenu = 1;
+                boolean skip       = false;
+                int     maxQty     = dipilih.kategori.equals("Minuman") ? 3 : 2;
+
+                LoopQty:
+                while (true) {
+                    System.out.printf("Catatan: Maksimal jumlah dari %s adalah %d%n",
+                            dipilih.nama, maxQty);
+                    System.out.println("         Ketik '0' / 'S' untuk membatalkan, Enter untuk default (1)");
+                    System.out.print("Masukkan jumlah " + dipilih.nama + ": ");
+                    String qInput = in.nextLine().trim();
+
+                    switch (qInput.toUpperCase()) {
+                        case "CC":
+                            System.out.println("Pesanan dibatalkan dan program akan dihentikan");
+                            break MainApp;
+                        case "":
+                            jumlahMenu = 1;
+                            break LoopQty;
+                        case "0":
+                        case "S":
+                            skip = true;
+                            break LoopQty;
                     }
 
-                    //jumlah default makanan/minuman = 1
-                    int jumlahMenu = 1;
-                    boolean skipPesanan = false;
-                    // biar gampang print max per kategori berapa
-                    String limitKategori = kategori.equals("Minuman") ? "3" : "2";
-
-                    LoopKuantitas: while (true) {
-                        System.out.printf("""
-                                Catatan: Maksimal jumlah dari %s adalah %s
-                                         Ketik '0'/'S' untuk membatalkan pesanan
-                                         Pencet Enter untuk kuantitas default (1)
-                                """, namaMenu, limitKategori );
-                        System.out.print("Masukkan jumlah " + namaMenu + ": ");
-
-                        String inputJumlah = in.nextLine();
-                        // user input CC pas di input jumlah
-                        switch (inputJumlah) {
-                            case "CC":
-                                System.out.println("Pesanan dibatalkan dan program akan dihentikan");
-                                break MainApp;
-
-                            // kalo user langsung enter nanti kesini
-                            case "":
-                                jumlahMenu = 1;
-                                break LoopKuantitas;
-
-                            // klo user skip pesanan
-                            case "0":
-                            case "S":
-                                skipPesanan = true;
-                                break LoopKuantitas;
+                    try {
+                        jumlahMenu = Integer.parseInt(qInput);
+                        if (jumlahMenu < 1 || jumlahMenu > maxQty) {
+                            System.out.println("Masukkan angka antara 1 dan " + maxQty);
+                        } else {
+                            break LoopQty;
                         }
-                        // user masukkan angka
-                        try {
-                            jumlahMenu = Integer.parseInt(inputJumlah);
-                            if (kategori.equals("Minuman") && (jumlahMenu < 1 || jumlahMenu > 3)){
-                                System.out.println("Masukkan porsi yang valid (1-3)");
-                            } else if (kategori.equals("Makanan") && (jumlahMenu < 1 || jumlahMenu > 2)){
-                                System.out.println("Masukkan porsi yang valid (1-2)");
-                            } else {
-                                break LoopKuantitas;
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Input tidak valid, Masukkan Angka / S / Enter");
-                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Input tidak valid, masukkan angka / S / Enter");
                     }
+                }
 
-                    if (skipPesanan){
-                        System.out.printf("Pesanan %s diskip\n" ,namaMenu);
-                    } else {
-                        keranjangNama[totalItemPesanan] = namaMenu;
-                        keranjangHarga[totalItemPesanan] = harga;
-                        keranjangJumlah[totalItemPesanan] = jumlahMenu;
-                        keranjangKategori[totalItemPesanan] = kategori;
-                        keranjangKode[totalItemPesanan] = kodePesanan;
+                if (skip) {
+                    System.out.printf("Pesanan %s diskip%n", dipilih.nama);
+                } else {
+                    pesanan.add(new OrderItem(
+                            dipilih.kode, dipilih.nama,
+                            dipilih.harga, jumlahMenu, dipilih.kategori));
 
-                        totalItemPesanan++;
+                    if (dipilih.kategori.equals("Minuman")) jumlahMinuman++;
+                    else                                     jumlahMakanan++;
 
-                        if(kategori.equals("Minuman")){jumlahMinuman++;}
-                        if(kategori.equals("Makanan")){jumlahMakanan++;}
+                    System.out.printf("%s (x%d) berhasil ditambahkan%n",
+                            dipilih.nama, jumlahMenu);
 
-                        System.out.println(namaMenu + " berjumlahkan " + jumlahMenu + " berhasil ditambahkan\n");
-                        // print item yang udah di list
+                    printOrderList(pesanan);
+                }
+            }
 
-                        System.out.println("\nDaftar item yang sudah di list");
-                        printList(keranjangKode, keranjangNama, keranjangJumlah, keranjangKategori, totalItemPesanan, "Minuman");
-                        printList(keranjangKode, keranjangNama, keranjangJumlah, keranjangKategori, totalItemPesanan, "Makanan");
+            if (pesanan.isEmpty()) continue;
+
+            // Pilih mata uang
+            TukarUang mataUang  = new toIDR();
+            boolean   validCurr = false;
+            do {
+                System.out.println();
+                System.out.println("+--------------------------------------------+");
+                System.out.println("|             Pilihan Mata Uang              |");
+                System.out.println("+--------------------------------------------+");
+                System.out.printf("| %-10s | %-12s | %-14s |\n",
+                        "Mata Uang", "Nilai Tukar", "Dalam Rupiah");
+                System.out.println("+--------------------------------------------+");
+                System.out.printf("| %-10s | %-12s | %-14s |\n", "IDR", "1 IDR",  "1 IDR");
+                System.out.printf("| %-10s | %-12s | %-14s |\n", "USD", "1 USD",  "15 IDR");
+                System.out.printf("| %-10s | %-12s | %-14s |\n", "JPY", "10 JPY", "1 IDR");
+                System.out.printf("| %-10s | %-12s | %-14s |\n", "MYR", "1 MYR",  "4 IDR");
+                System.out.printf("| %-10s | %-12s | %-14s |\n", "EUR", "1 EUR",  "14 IDR");
+                System.out.println("+--------------------------------------------+");
+                System.out.print("Mata uang Anda: ");
+                String pil = in.nextLine().trim().toUpperCase();
+                switch (pil) {
+                    case "IDR": mataUang = new toIDR(); validCurr = true; break;
+                    case "USD": mataUang = new toUSD(); validCurr = true; break;
+                    case "JPY": mataUang = new toJPY(); validCurr = true; break;
+                    case "MYR": mataUang = new toMYR(); validCurr = true; break;
+                    case "EUR": mataUang = new toEUR(); validCurr = true; break;
+                    default: System.out.println("Pilihan tidak valid, coba lagi!");
+                }
+            } while (!validCurr);
+
+            String currency = mataUang.getMataUang();
+
+            // Hitung total IDR 
+            double totalIDR = 0;
+            for (OrderItem oi : pesanan) totalIDR += (double) oi.harga * oi.jumlah;
+
+            // Metode pembayaran
+            String paymentMethod = "Tunai";
+            int    diskon        = 0;
+            int    biayaAdmin    = 0;
+
+            System.out.println("""
+                    Masukkan metode pembayaran:
+                    1. QRIS
+                    2. eMoney
+                    3. Tunai
+                    Atau ketik 'CC' untuk membatalkan""");
+            String metode = in.nextLine().trim().toLowerCase();
+
+            switch (metode) {
+                case "cc":
+                    System.out.println("Pesanan dibatalkan dan program akan dihentikan");
+                    break MainApp;
+
+                case "1": case "qris":
+                    diskon        = (int)(totalIDR * qris.getDiskon() / 100.0);
+                    biayaAdmin    = qris.getBiayaAdmin();
+                    paymentMethod = qris.getNamaBayar();
+                    double totalQ = totalIDR - diskon + biayaAdmin;
+                    if (qris.wallet < totalQ) {
+                        System.out.println("Wallet tidak cukup. Masukkan nominal top up (IDR) atau 'CC':");
+                        String nom = in.nextLine().toUpperCase();
+                        if (nom.equals("CC")) break MainApp;
+                        try { qris.topUp(Integer.parseInt(nom)); }
+                        catch (Exception e) { System.out.println("Input tidak valid"); }
                     }
-//
+                    qris.pay(Math.min(totalQ, qris.wallet));
                     break;
 
-                }
-
-                if (!kodeValid && !kodePesanan.isEmpty()){
-                    System.out.println("Masukkan kode makanan atau minuman yang valid");
-                }
-            }
-            if (!pesananBatal && totalItemPesanan > 0) {
-
-                TukarUang MataUang = new toIDR(); //Variabel untuk penukaran default "IDR"
-                boolean valid = false;
-
-                do {
-                    //Memilih mata uang yang digunakan
-                    System.out.println();
-                    System.out.println("""
-                             +--------------------------------------------+
-                             |             Pilihan Mata Uang              |
-                             +--------------------------------------------+""");
-                    System.out.printf("| %-10s | %-12s | %-14s | \n", "Mata Uang", "Nilai Tukar", "Dalam Rupiah");
-                    System.out.println("+--------------------------------------------+");
-                    System.out.printf("| %-10s | %-12s | %-14s | \n", "IDR", "1 IDR", "1 IDR");
-                    System.out.printf("| %-10s | %-12s | %-14s | \n", "USD", "1 USD", "15 IDR");
-                    System.out.printf("| %-10s | %-12s | %-14s | \n", "JPY", "10 JPY", "1 IDR");
-                    System.out.printf("| %-10s | %-12s | %-14s | \n", "MYR", "1 MYR", "4 IDR");
-                    System.out.printf("| %-10s | %-12s | %-14s | \n", "EUR", "1 EUR", "14 IDR");
-                    System.out.println("+--------------------------------------------+");
-
-                    System.out.println("\nTulis Mata Uang yang sesuai, contoh 'IDR'");
-                    System.out.print("Mata uang Anda: ");
-                    String pilihan = in.nextLine().toUpperCase(); //Biar input user selalu sama seperti case
-
-                    switch(pilihan) {
-                        case "IDR":
-                            MataUang = new toIDR();
-                            valid = true;
-                            break;
-                        case "USD":
-                            MataUang = new toUSD();
-                            valid = true;
-                            break;
-                        case "JPY":
-                            MataUang = new toJPY();
-                            valid = true;
-                            break;
-                        case "MYR":
-                            MataUang = new toMYR();
-                            valid = true;
-                            break;
-                        case "EUR":
-                            MataUang = new toEUR();
-                            valid = true;
-                            break;
-                        default:
-                            System.out.println("Pilihan tidak valid, coba lagi!");
+                case "2": case "emoney":
+                    diskon        = (int)(totalIDR * emoney.getDiskon() / 100.0);
+                    biayaAdmin    = emoney.getBiayaAdmin();
+                    paymentMethod = emoney.getNamaBayar();
+                    double totalE = totalIDR - diskon + biayaAdmin;
+                    if (emoney.wallet < totalE) {
+                        System.out.println("Wallet tidak cukup. Masukkan nominal top up (IDR) atau 'CC':");
+                        String nom = in.nextLine().toUpperCase();
+                        if (nom.equals("CC")) break MainApp;
+                        try { emoney.topUp(Integer.parseInt(nom)); }
+                        catch (Exception e) { System.out.println("Input tidak valid"); }
                     }
-                } while (!valid);
+                    emoney.pay(Math.min(totalE, emoney.wallet));
+                    break;
 
-                double[] keranjangPajak = new double[10];
-                double[] keranjangSubtotal = new double[10];
-                String currency = MataUang.getMataUang(); // dapat mata uang yang dipakai
-                String paymentMethod = "Tunai";
-                double diskon = 0;
-                double biayaAdmin = 0;
-
-                double totalMinumanNoTax = 0;
-                double totalMinumanTax = 0;
-                double totalMakananNoTax = 0;
-                double totalMakananTax = 0;
-                double totalTagihanAwal = totalMinumanNoTax + totalMakananNoTax;
-                double totalTagihanAkhir = totalMinumanTax + totalMakananNoTax - diskon + biayaAdmin;
-
-                // update: pengaturan pajak kutaruh atas biar pembacaan kode runtut
-                for(int i=0; i<totalItemPesanan; i++){
-                    double subtotal = keranjangJumlah[i] * keranjangHarga[i];
-                    double pajak;
-
-                    if(keranjangKategori[i].equals("Minuman")){
-                        if (keranjangHarga[i] < 50 ) pajak = 0;
-                        else if (keranjangHarga[i] <= 55) pajak = subtotal * 0.08;
-                        else pajak = subtotal * 0.11;
-
-                        totalMinumanNoTax += subtotal;
-                        totalMinumanTax += (subtotal + pajak);
-                    } else {
-                        if (keranjangHarga[i] > 50) pajak = subtotal * 0.08;
-                        else pajak = subtotal * 0.11;
-
-                        totalMakananNoTax += subtotal;
-                        totalMakananTax += (subtotal + pajak);
-                    }
-                    keranjangPajak[i] = pajak;
-                    keranjangSubtotal[i] = subtotal;
-                }
-
-                System.out.println("""
-                        Masukkan metode pembayaran yang ingin digunakan:
-                        1. Qris
-                        2. Emoney
-                        3. Tunai
-                        Atau anda bisa mengetik 'CC' untuk membatalkan pesanan dan keluar dari program""");
-                String metodePembayaran = in.nextLine().toLowerCase();
-
-                switch (metodePembayaran) {
-                    case "1":
-                    case "qris":
-                        diskon = totalTagihanAwal * qris.getDiskon() / 100.0;
-                        paymentMethod = qris.getNamaBayar();
-                        double totalTertagih = totalMinumanTax + totalMakananTax - diskon;
-
-                        while(qris.wallet < totalTertagih){
-                            System.out.printf("Saldo kurang %.0f. Top up (Ketik 'CC' batal): ", (totalTertagih - qris.wallet));
-                            String nominal = in.nextLine().toUpperCase();
-                            if(nominal.equals("CC")) break MainApp;
-                            try {
-                                qris.topUp(Double.parseDouble(nominal));
-                            } catch(Exception e){
-                                System.out.println("masukkan saldo yang valid");
-                            }
-                        }
-                        qris.pay(totalTertagih);
-                        break;
-
-                    case "2":
-                    case "emoney":
-                        diskon = totalTagihanAwal * emoney.getDiskon() / 100.0;
-                        biayaAdmin = emoney.getBiayaAdmin();
-                        paymentMethod = emoney.getNamaBayar();
-                        double totalTertagihEmoney = totalMinumanTax + totalMakananTax - diskon + biayaAdmin;
-
-                        while(emoney.wallet < totalTertagihEmoney){
-                            System.out.printf("Saldo kurang %.0f. Top up (Ketik 'CC' batal): ", (totalTertagihEmoney - emoney.wallet));
-                            String nominal = in.nextLine();
-                            if(nominal.equalsIgnoreCase("CC")) {
-                                break MainApp;
-                            }
-                            try {
-                                emoney.topUp(Double.parseDouble(nominal));
-                            }catch(Exception e){
-                                System.out.println("masukkan saldo yang valid");
-                            }
-                        }
-                        emoney.pay(totalTertagihEmoney);
-                        break;
-
-                    case "3":
-                    case "tunai":
-                        paymentMethod = "Tunai";
-                        break;
-                }
-
-                System.out.println();
-                System.out.println("""
-                        +------------------------------------------------------------------+
-                        |                         Kuitansi Kohisop                         |
-                        +------------------------------------------------------------------+""");
-                System.out.println("Daftar Minuman");
-                System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
-                System.out.println("------------------------------------------------------------------");
-                for (int i=0; i<totalItemPesanan; i++){
-                    if (keranjangKategori[i].equals("Minuman")){
-                        System.out.printf("%-4s | %-25s | %-3d | %-8.2f | %-5.2f | %.2f\n",
-                                keranjangKode[i],keranjangNama[i],keranjangJumlah[i],
-                                MataUang.Tukar(keranjangHarga[i]), MataUang.Tukar(keranjangPajak[i]), MataUang.Tukar(keranjangSubtotal[i]));
-                    }
-                }
-
-                System.out.println("\nDaftar Makanan");
-                System.out.printf("%-4s | %-25s | %-3s | %-8s | %-5s | %s\n", "Kode", "Nama Menu", "Qty", "Hrg/Porsi", "Pajak", "Subtotal");
-                System.out.println("------------------------------------------------------------------");
-                for (int i = 0; i < totalItemPesanan; i++) {
-                    if (keranjangKategori[i].equals("Makanan")) {
-                        System.out.printf("%-4s | %-25s | %-3d | %-8.2f | %-5.2f | %.2f\n",
-                                keranjangKode[i],keranjangNama[i],keranjangJumlah[i],
-                                MataUang.Tukar(keranjangHarga[i]), MataUang.Tukar(keranjangPajak[i]), MataUang.Tukar(keranjangSubtotal[i]));
-                    }
-                }
-
-                System.out.println("\n-------------------------------------------------------");
-                System.out.println("Ringkasan Pembayaran (" + currency + ")");
-                System.out.println("-------------------------------------------------------");
-                System.out.printf("%-40s : %.2f\n", "Total Minuman (Tanpa Pajak)", MataUang.Tukar(totalMinumanNoTax));
-                System.out.printf("%-40s : %.2f\n", "Total Minuman (Termasuk Pajak)", MataUang.Tukar(totalMinumanTax));
-                System.out.printf("%-40s : %.2f\n", "Total Makanan (Tanpa Pajak)", MataUang.Tukar(totalMakananNoTax)); // Sesuai temuan Anda!
-                System.out.printf("%-40s : %.2f\n", "Total Makanan (Termasuk Pajak)", MataUang.Tukar(totalMakananTax));
-                System.out.println("-------------------------------------------------------");
-                System.out.printf("%-40s : %.2f\n", "Total Tagihan (Awal)", MataUang.Tukar(totalTagihanAwal));
-                System.out.printf("%-40s : %.2f\n", "Diskon Channel", MataUang.Tukar(diskon));
-                System.out.printf("%-40s : %.2f\n", "Biaya Admin", MataUang.Tukar(biayaAdmin));
-                System.out.printf("%-40s : %s\n", "Metode Pembayaran", paymentMethod);
-                System.out.println("-------------------------------------------------------");
-                System.out.printf("%-40s : %s %.2f\n", "Total Tagihan Akhir", currency, MataUang.Tukar(totalMinumanTax + totalMakananTax - diskon + biayaAdmin));
-                System.out.println("-------------------------------------------------------\n");
-
-                while (true) {
-                    System.out.print("Apakah anda melakukan pemesanan baru? (Y/N): ");
-                    String opsiAkhir = in.nextLine().toUpperCase();
-
-                    if (opsiAkhir.equals("N")) {
-                        System.out.println("Program akan ditutup");
-                        break MainApp;
-
-                    } else if (opsiAkhir.equals("Y")) {
-                        System.out.println("\nPesanan baru dibuat");
-                        break;
-
-                    } else {
-                        System.out.println("Input tidak valid. Masukkan Y / N");
-                    }
-                }
-
+                default:
+                    paymentMethod = "Tunai";
             }
 
-        }
-    }
+            double totalAkhirIDR  = totalIDR - diskon + biayaAdmin;
+            double totalAkhirKonv = mataUang.Tukar(totalAkhirIDR);
 
-    public static void printMenu(String kategori, String[][] menu) {
-        System.out.println("+------+----------------------------------------+-----------+");
-        System.out.printf("%-5s %-40s %s|\n", "| Kode", ("| Nama "+kategori), "| Harga (Rp)");
-        System.out.println("+------+----------------------------------------+-----------+");
-        for (int i=0; i<menu.length; i++){
-            if (menu[i][3].equals(kategori)) {
-                System.out.printf("%-5s  %-40s %-11s |\n", ("| "+menu[i][0]),("| " + menu[i][1]), ("| " + menu[i][2]));
+            //  KUITANSI
+
+            LinkedList<OrderItem> sortedPesanan = sortedOrderList(pesanan);
+
+            System.out.println();
+            System.out.println("+------------------------------------------------------------------+");
+            System.out.println("|                        Kuitansi Kohisop                         |");
+            System.out.println("+------------------------------------------------------------------+");
+            System.out.println("| Mata Uang: " + currency);
+
+            double totalMakananNoTax = 0, totalMakananTax = 0;
+            double totalMinumanNoTax = 0, totalMinumanTax = 0;
+
+            System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
+            System.out.printf("| %-4s | %-34s | %-9s | %-7s | %-8s | %-8s |\n",
+                    "Kode", "Nama Makanan", "Hrg/Porsi", "Jumlah", "Pajak", "Subtotal");
+            System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
+            for (OrderItem oi : sortedPesanan) {
+                if (!oi.kategori.equals("Makanan")) continue;
+                double hargaKonv = mataUang.Tukar(oi.harga);
+                double subtotal  = hargaKonv * oi.jumlah;
+                double pajak     = 0; // placeholder – implementasikan pajak di sini
+                System.out.printf("| %-4s | %-34s | %-9.2f | %-7d | %-8.2f | %-8.2f |\n",
+                        oi.kode, oi.nama, hargaKonv, oi.jumlah, pajak, subtotal);
+                totalMakananNoTax += subtotal;
+                totalMakananTax   += subtotal + pajak;
+            }
+            System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
+
+            // -- Minuman --
+            System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
+            System.out.printf("| %-4s | %-34s | %-9s | %-7s | %-8s | %-8s |\n",
+                    "Kode", "Nama Minuman", "Hrg/Porsi", "Jumlah", "Pajak", "Subtotal");
+            System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
+            for (OrderItem oi : sortedPesanan) {
+                if (!oi.kategori.equals("Minuman")) continue;
+                double hargaKonv = mataUang.Tukar(oi.harga);
+                double subtotal  = hargaKonv * oi.jumlah;
+                double pajak     = 0;
+                System.out.printf("| %-4s | %-34s | %-9.2f | %-7d | %-8.2f | %-8.2f |\n",
+                        oi.kode, oi.nama, hargaKonv, oi.jumlah, pajak, subtotal);
+                totalMinumanNoTax += subtotal;
+                totalMinumanTax   += subtotal + pajak;
+            }
+            System.out.println("+------+------------------------------------+-----------+---------+----------+----------+");
+
+            // -- Ringkasan --
+            System.out.println("\n-------------------------------------------------------");
+            System.out.println("Ringkasan Pembayaran (" + currency + ")");
+            System.out.println("-------------------------------------------------------");
+            System.out.printf("%-40s : %.2f%n", "Total Makanan (Tanpa Pajak)",        totalMakananNoTax);
+            System.out.printf("%-40s : %.2f%n", "Total Makanan (Termasuk Pajak)",     totalMakananTax);
+            System.out.println("-------------------------------------------------------");
+            System.out.printf("%-40s : %.2f%n", "Total Minuman (Tanpa Pajak)",        totalMinumanNoTax);
+            System.out.printf("%-40s : %.2f%n", "Total Minuman (Termasuk Pajak)",     totalMinumanTax);
+            System.out.println("-------------------------------------------------------");
+            System.out.printf("%-40s : %.2f%n", "Total Tagihan (Sebelum Pajak/Diskon)", mataUang.Tukar(totalIDR));
+            System.out.printf("%-40s : %.2f%n", "Diskon Channel Pembayaran",          mataUang.Tukar(diskon));
+            System.out.printf("%-40s : %.2f%n", "Biaya Admin Channel",                mataUang.Tukar(biayaAdmin));
+            System.out.printf("%-40s : %s%n",   "Metode Pembayaran",                  paymentMethod);
+            System.out.println("-------------------------------------------------------");
+            System.out.printf("%-40s : %s %.2f%n", "Total Tagihan Akhir", currency, totalAkhirKonv);
+            System.out.println("-------------------------------------------------------");
+            System.out.println("\n        Terima kasih dan silahkan datang kembali       ");
+            System.out.println("-------------------------------------------------------\n");
+
+            while (true) {
+                System.out.print("Apakah anda melakukan pemesanan baru? (Y/N): ");
+                String opsi = in.nextLine().trim().toUpperCase();
+                if      (opsi.equals("N")) { System.out.println("Program akan ditutup"); break MainApp; }
+                else if (opsi.equals("Y")) { System.out.println("\nPesanan baru dibuat"); break; }
+                else                        { System.out.println("Input tidak valid. Masukkan Y / N"); }
             }
         }
-        System.out.println("+------+----------------------------------------+-----------+");
-        System.out.println();
-    }
-
-    public static void printList(String[] kode, String[] nama, int[] qty, String[] arrayKategori, int totalItem, String kategori){
-
-        boolean keranjangTerIsi = false;
-        for (int i=0; i< totalItem; i++){
-            // buat ngecek ada data atau nggak di dalam list pesanan
-            if (arrayKategori[i].equals(kategori)){
-                keranjangTerIsi = true;
-                break;
-            }
-        }
-
-        if (!keranjangTerIsi){
-            return;
-        }
-
-        //ini buat ngeprint
-        System.out.println("+------+----------------------------------------+-----------+");
-        System.out.printf("%-5s %-40s %-12s|\n", "| Kode", ("| Nama " + kategori), "| Jumlah");
-        System.out.println("+------+----------------------------------------+-----------+");
-        for (int j = 0; j < totalItem; j++) {
-            if (arrayKategori[j].equals(kategori)) {
-                System.out.printf("%-5s  %-40s |%-11d|\n", ("| " + kode[j]), ("| " + nama[j]), qty[j]);
-            }
-        }
-        System.out.println("+------+----------------------------------------+-----------+");
     }
 }
